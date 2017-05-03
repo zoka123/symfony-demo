@@ -17,6 +17,7 @@ use AppBundle\Entity\Post;
 use Doctrine\Common\DataFixtures\AbstractFixture;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Common\Persistence\ObjectManager;
+use Faker\Factory;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerAwareTrait;
 
@@ -37,35 +38,38 @@ class PostFixtures extends AbstractFixture implements DependentFixtureInterface,
     use ContainerAwareTrait;
     use FixturesTrait;
 
+    const LIMIT = 5000;
+
     /**
      * {@inheritdoc}
      */
     public function load(ObjectManager $manager)
     {
-        foreach ($this->getRandomPostTitles() as $i => $title) {
+        $faker = Factory::create();
+        foreach (range(1, self::LIMIT) as $i) {
             $post = new Post();
 
-            $post->setTitle($title);
-            $post->setSummary($this->getRandomPostSummary());
+            $post->setTitle($faker->sentence());
+            $post->setSummary($faker->realText(200));
             $post->setSlug($this->container->get('slugger')->slugify($post->getTitle()));
-            $post->setContent($this->getPostContent());
+            $post->setContent($faker->realText(800));
             // "References" are the way to share objects between fixtures defined
             // in different files. This reference has been added in the UserFixtures
             // file and it contains an instance of the User entity.
             $post->setAuthor($this->getReference('jane-admin'));
-            $post->setPublishedAt(new \DateTime('now - '.$i.'days'));
+            $post->setPublishedAt($faker->dateTimeThisYear);
 
             // for aesthetic reasons, the first blog post always has 2 tags
             foreach ($this->getRandomTags($i > 0 ? mt_rand(0, 3) : 2) as $tag) {
                 $post->addTag($tag);
             }
 
-            foreach (range(1, 5) as $j) {
+            foreach (range(1, rand(1, 150)) as $j) {
                 $comment = new Comment();
 
                 $comment->setAuthor($this->getReference('john-user'));
-                $comment->setPublishedAt(new \DateTime('now + '.($i + $j).'seconds'));
-                $comment->setContent($this->getRandomCommentContent());
+                $comment->setPublishedAt($faker->dateTimeThisYear);
+                $comment->setContent($faker->realText());
                 $comment->setPost($post);
 
                 $manager->persist($comment);
@@ -101,9 +105,9 @@ class PostFixtures extends AbstractFixture implements DependentFixtureInterface,
             return $tags;
         }
 
-        $indexes = (array) array_rand($this->getTagNames(), $numTags);
+        $indexes = (array)array_rand($this->getTagNames(), $numTags);
         foreach ($indexes as $index) {
-            $tags[] = $this->getReference('tag-'.$index);
+            $tags[] = $this->getReference('tag-' . $index);
         }
 
         return $tags;
