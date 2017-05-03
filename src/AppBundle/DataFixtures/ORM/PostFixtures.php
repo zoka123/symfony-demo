@@ -38,7 +38,7 @@ class PostFixtures extends AbstractFixture implements DependentFixtureInterface,
     use ContainerAwareTrait;
     use FixturesTrait;
 
-    const LIMIT = 2000;
+    const LIMIT = 100;
 
     /**
      * {@inheritdoc}
