@@ -83,11 +83,16 @@ class BlogController extends Controller
         // Fetch popular posts
         $popularPosts = $this->getDoctrine()->getRepository(Post::class)->findPopular(10);
 
-        return $this->render('blog/post_show.html.twig', [
+        $response = $this->render('blog/post_show.html.twig', [
             'post'         => $post,
             'recentPosts'  => $recentPosts,
             'popularPosts' => $popularPosts,
         ]);
+
+        $response->setTtl(60);
+
+        return $response;
+
     }
 
     /**
