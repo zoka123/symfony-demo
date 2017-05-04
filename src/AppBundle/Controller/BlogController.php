@@ -53,7 +53,7 @@ class BlogController extends Controller
         // Every template name also has two extensions that specify the format and
         // engine for that template.
         // See https://symfony.com/doc/current/templating.html#template-suffix
-        return $this->render('blog/index.'.$_format.'.twig', ['posts' => $posts]);
+        return $this->render('blog/index.' . $_format . '.twig', ['posts' => $posts]);
     }
 
     /**
@@ -77,7 +77,17 @@ class BlogController extends Controller
             dump($post, $this->get('security.token_storage')->getToken()->getUser(), new \DateTime());
         }
 
-        return $this->render('blog/post_show.html.twig', ['post' => $post]);
+        // Fetch recent posts
+        $recentPosts = $this->getDoctrine()->getRepository(Post::class)->findRecent(10);
+
+        // Fetch popular posts
+        $popularPosts = $this->getDoctrine()->getRepository(Post::class)->findPopular(10);
+
+        return $this->render('blog/post_show.html.twig', [
+            'post'         => $post,
+            'recentPosts'  => $recentPosts,
+            'popularPosts' => $popularPosts,
+        ]);
     }
 
     /**

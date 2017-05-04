@@ -6,7 +6,8 @@
     <h1>{{ post.title }}</h1>
 
     <p class="post-metadata">
-        <span class="metadata"><i class="fa fa-calendar"></i> {{ post.publishedAt|localizeddate('long', 'medium', null, 'UTC') }}</span>
+        <span class="metadata"><i
+                    class="fa fa-calendar"></i> {{ post.publishedAt|localizeddate('long', 'medium', null, 'UTC') }}</span>
         <span class="metadata"><i class="fa fa-user"></i> {{ post.author.fullName }}</span>
     </p>
 
@@ -64,6 +65,26 @@
             </a>
         </div>
     {% endif %}
+
+    <h2>Recent posts</h2>
+    {% for postItem in recentPosts %}
+        <div class="row">
+            <a href="{{ url('blog_post', {slug: postItem.slug}) }}">
+                <h4>{{ postItem.title }}</h4>
+            </a>
+        </div>
+    {% endfor %}
+
+    <h2>Popular posts</h2>
+    {% for postGroup in popularPosts %}
+        <div class="row">
+            {% set postItem = postGroup[0] %}
+            <a href="{{ url('blog_post', {slug: postItem.slug}) }}">
+                <h4>{{ postItem.title }}</h4> ({{ postGroup['mycount'] }} <i class="fa fa-comment"></i>)
+            </a>
+        </div>
+    {% endfor %}
+
 
     {# the parent() function includes the contents defined by the parent template
       ('base.html.twig') for this block ('sidebar'). This is a very convenient way

@@ -44,10 +44,26 @@ class PostRepository extends EntityRepository
                 WHERE p.publishedAt <= :now
                 ORDER BY p.publishedAt DESC
             ')
-            ->setParameter('now', new \DateTime())
-        ;
+            ->setParameter('now', new \DateTime());
 
         return $this->createPaginator($query, $page);
+    }
+
+    public function findRecent($limit)
+    {
+        return $this->findBy([], ['publishedAt' => 'DESC'], $limit);
+    }
+
+    public function findPopular($limit)
+    {
+        $qb = $this->createQueryBuilder('p')
+            ->select('p, COUNT(c.id) AS mycount')
+            ->innerJoin('p.comments', 'c')
+            ->orderBy('mycount', 'DESC')
+            ->groupBy('p.id')
+            ->setMaxResults($limit);
+
+        return $qb->getQuery()->getResult();
     }
 
     private function createPaginator(Query $query, $page)
